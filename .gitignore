@@ -67,3 +67,4 @@ out/
 *.pdf
 *.txt
 *.xml
+.idea/

@@ -79,7 +79,7 @@ public class SearchEngineMain {
 
         HashMap<String, List<TermInfo>> invertedIndex = new HashMap<String, List<TermInfo>>();
 
-        String infile = "C:\\Users\\Cain\\workspace\\MSCI541\\latimes.gz";
+        String infile = "C:\\Users\\Allan\\workspace\\MSCI541\\latimes.gz";
         GZIPInputStream in = new GZIPInputStream(new FileInputStream(infile));
 
         Reader decoder = new InputStreamReader(in);
@@ -112,45 +112,48 @@ public class SearchEngineMain {
                         String[] tokenizedLine = tokenizeLine(line);
                         TermInfo termInfo = new TermInfo(docno, 1);
                         for (String token : tokenizedLine){
+                            if (!token.trim().isEmpty()) {
+                                List<TermInfo> termInfoList = invertedIndex.get(token);
 
-                            List<TermInfo> termInfoList = invertedIndex.get(token);
+                                //Remove old termInfoList
+                                invertedIndex.remove(token);
 
-                            //Remove old termInfoList
-                            invertedIndex.remove(token);
+                                //If token doesn't exist in map
+                                if (termInfoList == null) {
+                                    List<TermInfo> newList = new ArrayList<TermInfo>();
+                                    newList.add(termInfo);
+                                    invertedIndex.put(token, newList);
+                                } else {
 
-                            //If token doesn't exist in map
-                            if (termInfoList == null) {
-                                List<TermInfo> newList = new ArrayList<TermInfo>();
-                                newList.add(termInfo);
-                                invertedIndex.put(token, newList);
-                            } else {
-
-                                //For each token, get list of <docid, freqCount>
-                                boolean termInfoAdded = false;
-                                for (TermInfo tempTermInfo : termInfoList){
-                                    if (tempTermInfo.getDocId().equals(docno)) {
-                                        tempTermInfo.setTermFreq(tempTermInfo.getTermFreq() + 1);
-                                        termInfoAdded = true;
-                                        writer.format("%s, %s, %d\n", token, tempTermInfo.getDocId(), tempTermInfo.getTermFreq());
-//                                        System.out.format("Token: %s, Term Info DocID: %s, DocID: %s, " +
-//                                                        "TermFreq: %d\n", token, tempTermInfo.getDocId(), docno,
-//                                                tempTermInfo.getTermFreq());
-                                        break;
+                                    //For each token, get list of <docid, freqCount>
+                                    boolean termInfoAdded = false;
+                                    for (TermInfo tempTermInfo : termInfoList) {
+                                        if (tempTermInfo.getDocId().equals(docno)) {
+                                            tempTermInfo.setTermFreq(tempTermInfo.getTermFreq() + 1);
+                                            termInfoAdded = true;
+                                            writer.format("%s|%s|%d\n", token, tempTermInfo.getDocId(), tempTermInfo.getTermFreq());
+                                            break;
+                                        }
                                     }
-                                }
 
-                                //Add if termInfo does not exist
-                                if (!termInfoAdded) {
-                                    termInfoList.add(termInfo);
-                                }
+                                    //Add if termInfo does not exist
+                                    if (!termInfoAdded) {
+                                        writer.format("%s|%s|%d\n", token, termInfo.getDocId(), termInfo.getTermFreq());
+                                        termInfoList.add(termInfo);
+                                    }
 
-                                //Replace old list with new list
-                                invertedIndex.put(token, termInfoList);
+                                    //Replace old list with new list
+                                    invertedIndex.put(token, termInfoList);
+                                }
                             }
                         }
+                        if (br.ready()){
+                            line = br.readLine().toLowerCase();
+                        }
+                    }
+                    if (br.ready()){
                         line = br.readLine().toLowerCase();
                     }
-                    line = br.readLine().toLowerCase();
                 }
             }
         }
