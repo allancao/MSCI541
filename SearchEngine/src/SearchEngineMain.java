@@ -83,12 +83,25 @@ public class SearchEngineMain {
 
         String line;
 
+        double k1 = 1.2;
+        double k2 = 0.75;
+        double b = 0.75;
+
+        HashMap<String, Integer> docList = new HashMap<String, Integer>();
+
+        int numDocs = 0;
+        int dl = 0;
+        double avgdl = 0;
+
         PrintWriter writer = new PrintWriter("index.txt", "UTF-8");
 
         //Read in docno
         while ((line = br.readLine()) != null) {
             line = line.toLowerCase();
             if (line.contains("<docno>")) {
+
+                //Increase doc length, to get total docs
+                numDocs += 1;
                 String docno = line.substring(8, line.length() - 9);
                 line = br.readLine();
 
@@ -107,6 +120,9 @@ public class SearchEngineMain {
                     while(validText) {
                         String[] tokenizedLine = tokenizeLine(line);
                         TermInfo termInfo = new TermInfo(docno, 1);
+
+                        //Add docId and its length
+                        docList.add(new DocInfo(docno, tokenizedLine.length));
                         for (String token : tokenizedLine){
                             if (!token.trim().isEmpty()) {
                                 List<TermInfo> termInfoList = invertedIndex.get(token);
@@ -127,14 +143,14 @@ public class SearchEngineMain {
                                         if (tempTermInfo.getDocId().equals(docno)) {
                                             tempTermInfo.setTermFreq(tempTermInfo.getTermFreq() + 1);
                                             termInfoAdded = true;
-                                            writer.format("%s|%s|%d\n", token, tempTermInfo.getDocId(), tempTermInfo.getTermFreq());
+//                                            writer.format("%s|%s|%d\n", token, tempTermInfo.getDocId(), tempTermInfo.getTermFreq());
                                             break;
                                         }
                                     }
 
                                     //Add if termInfo does not exist
                                     if (!termInfoAdded) {
-                                        writer.format("%s|%s|%d\n", token, termInfo.getDocId(), termInfo.getTermFreq());
+//                                        writer.format("%s|%s|%d\n", token, termInfo.getDocId(), termInfo.getTermFreq());
                                         termInfoList.add(termInfo);
                                     }
 
