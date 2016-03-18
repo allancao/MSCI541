@@ -69,9 +69,8 @@ public class SearchEngineMain {
 
     public static void main(String[] args) throws IOException {
 
-        Pattern begin = Pattern.compile("<\\/HEADLINE>|<\\/TEXT>|<\\/GRAPHIC>");
-        Pattern end = Pattern.compile("<HEADLINE>|<TEXT>|<GRAPHIC>");
-        Matcher matcher;
+        Pattern begin = Pattern.compile("<headline>|<text>|<graphic>");
+        Pattern end = Pattern.compile("</headline>|</text>|</graphic>");
 
         HashMap<String, List<TermInfo>> invertedIndex = new HashMap<String, List<TermInfo>>();
 
@@ -89,40 +88,36 @@ public class SearchEngineMain {
 
         HashMap<String, Integer> docList = new HashMap<String, Integer>();
 
-        int numDocs = 0;
-        int dl = 0;
-        double avgdl = 0;
-
         PrintWriter writer = new PrintWriter("index.txt", "UTF-8");
 
         //Read in docno
         while ((line = br.readLine()) != null) {
             line = line.toLowerCase();
             if (line.contains("<docno>")) {
-
                 //Increase doc length, to get total docs
-                numDocs += 1;
                 String docno = line.substring(8, line.length() - 9);
-                line = br.readLine();
-
+                System.out.println(docno);
                 //Read in line after docno, while end tag not found
-                while(!line.contains("</docno>")) {
-                    boolean validText = true;
-
-                    //Check if line has validText tag
-                    if ((matcher = begin.matcher(line)).find()) {
+                while(!line.contains("</doc>")) {
+                    boolean validText = false;
+                    if (begin.matcher(line).find()) {
                         validText = true;
-                    } else if ((matcher = end.matcher(line)).find()) {
-                        validText = false;
                     }
 
                     //While validText tag
                     while(validText) {
                         String[] tokenizedLine = tokenizeLine(line);
+                        //Add docId and length of doc for BM25 calculations
+                        if (docList.get(docno) != null) {
+                            docList.put(docno, docList.get(docno) + tokenizedLine.length);
+                        } else {
+                            docList.put(docno, tokenizedLine.length);
+                        }
+
                         TermInfo termInfo = new TermInfo(docno, 1);
 
                         //Add docId and its length
-                        docList.add(new DocInfo(docno, tokenizedLine.length));
+                        docList.put(docno, tokenizedLine.length);
                         for (String token : tokenizedLine){
                             if (!token.trim().isEmpty()) {
                                 List<TermInfo> termInfoList = invertedIndex.get(token);
@@ -159,6 +154,8 @@ public class SearchEngineMain {
                                 }
                             }
                         }
+
+                        if (end.matcher(line).find()) { validText = false; }
                         if (br.ready()){
                             line = br.readLine().toLowerCase();
                         }
@@ -169,7 +166,8 @@ public class SearchEngineMain {
                 }
             }
         }
-        writer.close();
+//        writer.close();
+        System.out.println(docList.size());
     }
 }
 
