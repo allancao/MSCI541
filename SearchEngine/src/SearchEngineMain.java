@@ -8,10 +8,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-/**
- * Created by Cain on 3/17/2016.
- */
-
 public class SearchEngineMain {
 
     static String[] titles = {"foreign minorities, Germany",
@@ -157,6 +153,7 @@ public class SearchEngineMain {
                 }
             }
         }
+        writer.close();
     }
 }
 
