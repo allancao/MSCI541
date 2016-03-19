@@ -65,6 +65,5 @@ target/
 out/
 *latimes.sample.txt*
 *.pdf
-*.txt
 *.xml
 .idea/
