@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/MSCI541.iml" filepath="$PROJECT_DIR$/MSCI541.iml" />
       <module fileurl="file://$PROJECT_DIR$/SearchEngine/SearchEngine.iml" filepath="$PROJECT_DIR$/SearchEngine/SearchEngine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SearchEngineCustom/SearchEngineCustom.iml" filepath="$PROJECT_DIR$/SearchEngineCustom/SearchEngineCustom.iml" />
     </modules>
   </component>
 </project>

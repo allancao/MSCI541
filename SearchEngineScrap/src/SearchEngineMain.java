@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 public class SearchEngineMain {
@@ -84,7 +83,7 @@ public class SearchEngineMain {
                 if (comp1.equals(comp2)){
                     passedMap.remove(key);
                     mapKeys.remove(key);
-                    sortedMap.put((String)key, (Double)val);
+                    sortedMap.put(key, val);
                     break;
                 }
             }
@@ -93,7 +92,7 @@ public class SearchEngineMain {
     }
 
     public static HashMap<Integer, HashMap<String,Integer>> parseQRels() throws IOException{
-        String qrelsFile = "C:\\Users\\Allan\\workspace\\MSCI541\\LA-only.trec8-401.450.minus416-423-437-444-447.txt";
+        String qrelsFile = "C:\\Users\\Cain\\workspace\\MSCI541\\LA-only.trec8-401.450.minus416-423-437-444-447.txt";
         FileInputStream qrelsStream = new FileInputStream(qrelsFile);
         BufferedReader qrelsReader = new BufferedReader(new InputStreamReader(qrelsStream));
 
@@ -116,7 +115,7 @@ public class SearchEngineMain {
     }
 
     public static ArrayList<String[]> parseScores() throws IOException{
-        String scoresFile = "C:\\Users\\Allan\\workspace\\MSCI541\\scores.txt";
+        String scoresFile = "C:\\Users\\Cain\\workspace\\MSCI541\\scores.txt";
         FileInputStream scoresStream = new FileInputStream(scoresFile);
         BufferedReader scoresReader = new BufferedReader(new InputStreamReader(scoresStream));
         String line;
@@ -153,22 +152,37 @@ public class SearchEngineMain {
             }
 
             double numRelevant = 0;
-            double precision = 0;
             for (int a = 0; a < pList.length; a++) {
                 numRelevant += pList[a];
-                if (pList[a] == 1) {
-                    precision += (numRelevant / (a + 1));
-                }
             }
-            precisionList.add(precision/numRelevant);
+            precisionList.add(numRelevant/10);
 
             double totalGain = 0;
             double totalIdealGain = 0;
             for (int a = 0; a < gainList.length; a++) {
                 totalGain += (gainList[a]/(Math.log(a+2)/Math.log(2)));
             }
-            for (int a = 0; a < numRelevant; a++) {
-                totalIdealGain += (1/(Math.log(a+2)/Math.log(2)));
+
+//            int qRelsNum = 0;
+//            HashMap<String, Integer> qrelsRelevant = qrels.get(topicId);
+//            for (String key : qrelsRelevant.keySet()) {
+//                qRelsNum += qrelsRelevant.get(key);
+//                if (qRelsNum == 10) {
+//                    break;
+//                }
+//            }
+
+            ArrayList<Double> qrelsRelevant = new ArrayList<Double>();
+            LinkedHashMap<String, Integer> qrelsTopicMap = sortHashMapByValues(qrels.get(topicId));
+            for (String key : qrelsTopicMap.keySet()) {
+                qrelsRelevant.add(new Double(qrelsTopicMap.get(key)));
+                if (qrelsRelevant.size() == 10) {
+                    break;
+                }
+            }
+
+            for (int a = 0; a < qrelsRelevant.size(); a++) {
+                totalIdealGain += (qrelsRelevant.get(a)/(Math.log(a+2)/Math.log(2)));
             }
             System.out.println(topicId + "|" + totalGain);
             System.out.println(topicId + "|" + totalIdealGain);
@@ -199,7 +213,7 @@ public class SearchEngineMain {
 
         //every topic in topic list
         for (Topic topic : topics) {
-            String[] queryTerms = topic.getTopic().split(" ");
+            String[] queryTerms = topic.getTopic().replaceAll("[^a-zA-Z0-9]", " ").toLowerCase().trim().split(" ");
             HashMap<String, Double> docScoresPerTopic = new HashMap<String, Double>();
             //every doc in list of docs
             for (String docno : docList.keySet()) {
@@ -224,8 +238,8 @@ public class SearchEngineMain {
 
                             bm25Score += (tfInDoc * tfInQuery * idf);
                             if (topic.getTopicId() == 401) {
-//                                System.out.println(topic.getTopicId() + "|" + docno + "|" + term + "|ni:" + ni + "|termCountInDoc" +
-//                                        termCountInDoc + "|" + K + "|" + tfInDoc + "|" + tfInQuery + "|" + idf + "|" + "|" + docList.get(docno) + "|" + avdl + "|" + bm25Score);
+                                System.out.println(topic.getTopicId() + "|" + docno + "|" + term + "|ni:" + ni + "|termCountInDoc" +
+                                        termCountInDoc + "|" + K + "|" + tfInDoc + "|" + tfInQuery + "|" + idf + "|" + "|" + docList.get(docno) + "|" + avdl + "|" + bm25Score);
                             }
                         }
                     }
@@ -250,7 +264,7 @@ public class SearchEngineMain {
         HashMap<String, HashMap<String, Integer>> invertedIndex = new HashMap<String, HashMap<String, Integer>>();
         HashMap<String, Integer> docList = new HashMap<String, Integer>();
 
-        String infile = "C:\\Users\\Allan\\workspace\\MSCI541\\latimes2.gz";
+        String infile = "C:\\Users\\Cain\\workspace\\MSCI541\\latimes.gz";
         GZIPInputStream in = new GZIPInputStream(new FileInputStream(infile));
 
         Reader decoder = new InputStreamReader(in);
